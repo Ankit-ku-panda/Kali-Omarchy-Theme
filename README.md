@@ -1,7 +1,7 @@
 # Kali Omarchy 2.0.1
 
-[![Release](https://img.shields.io/github/v/release/Ankit-ku-panda/Kali-Omarchy-Xfce?style=flat-square)](https://github.com/Ankit-ku-panda/Kali-Omarchy-Xfce/releases)
-[![Smoke test](https://img.shields.io/github/actions/workflow/status/Ankit-ku-panda/Kali-Omarchy-Xfce/test.yml?branch=main&style=flat-square&label=tests)](https://github.com/Ankit-ku-panda/Kali-Omarchy-Xfce/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/Ankit-ku-panda/Kali-Omarchy-Theme?style=flat-square)](https://github.com/Ankit-ku-panda/Kali-Omarchy-Theme/releases)
+[![Smoke test](https://img.shields.io/github/actions/workflow/status/Ankit-ku-panda/Kali-Omarchy-Theme/test.yml?branch=main&style=flat-square&label=tests)](https://github.com/Ankit-ku-panda/Kali-Omarchy-Theme/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-7aa2f7?style=flat-square)](LICENSE)
 
 An Omarchy-style command center and complete 22-theme layer for **Kali Linux
