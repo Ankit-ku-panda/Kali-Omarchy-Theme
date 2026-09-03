@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+file="${1:-}"
+[[ "$file" == "${XDG_STATE_HOME:-$HOME/.local/state}/kali-omarchy/reminders/"*.txt && -r "$file" ]] || exit 1
+message="$(sed -n '2,$p' "$file")"
+command -v notify-send >/dev/null 2>&1 && notify-send -u normal -a "Kali Omarchy" "Reminder" "$message"
+rm -f -- "$file"
+

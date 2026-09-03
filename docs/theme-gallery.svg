@@ -1,0 +1,269 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1734" height="1264" viewBox="0 0 1734 1264">
+<rect width="100%" height="100%" fill="#0b0f14"/>
+<text x="34" y="48" fill="#f0f4f8" font-family="JetBrains Mono,monospace" font-size="25" font-weight="700">KALI OMARCHY — 22 THEMES</text>
+<text x="34" y="77" fill="#8a96a3" font-family="JetBrains Mono,monospace" font-size="13">Current Omarchy palettes adapted for Kali Linux Xfce</text>
+<g transform="translate(34 112)">
+<rect width="400" height="168" rx="13" fill="#1e1e2e" stroke="#89b4fa" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#cdd6f4" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Catppuccin</text>
+<text x="20" y="59" fill="#6c7086" font-family="JetBrains Mono,monospace" font-size="11">DARK  #1e1e2e  +  #89b4fa</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#f38ba8"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#a6e3a1"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#f9e2af"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#89b4fa"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#f5c2e7"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#94e2d5"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#89b4fa"/>
+</g>
+<g transform="translate(456 112)">
+<rect width="400" height="168" rx="13" fill="#eff1f5" stroke="#1e66f5" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#4c4f69" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Catppuccin Latte</text>
+<text x="20" y="59" fill="#9ca0b0" font-family="JetBrains Mono,monospace" font-size="11">LIGHT  #eff1f5  +  #1e66f5</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#d20f39"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#40a02b"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#df8e1d"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#1e66f5"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#ea76cb"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#179299"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#1e66f5"/>
+</g>
+<g transform="translate(878 112)">
+<rect width="400" height="168" rx="13" fill="#060B1E" stroke="#7d82d9" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#ffcead" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Ethereal</text>
+<text x="20" y="59" fill="#6d7db6" font-family="JetBrains Mono,monospace" font-size="11">DARK  #060B1E  +  #7d82d9</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#ED5B5A"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#92a593"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#E9BB4F"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#7d82d9"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#c89dc1"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#a3bfd1"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#7d82d9"/>
+</g>
+<g transform="translate(1300 112)">
+<rect width="400" height="168" rx="13" fill="#2d353b" stroke="#7fbbb3" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#d3c6aa" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Everforest</text>
+<text x="20" y="59" fill="#4f585e" font-family="JetBrains Mono,monospace" font-size="11">DARK  #2d353b  +  #7fbbb3</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#e67e80"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#a7c080"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#dbbc7f"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#7fbbb3"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#d699b6"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#83c092"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#7fbbb3"/>
+</g>
+<g transform="translate(34 302)">
+<rect width="400" height="168" rx="13" fill="#FFFCF0" stroke="#205EA6" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#100F0F" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Flexoki Light</text>
+<text x="20" y="59" fill="#878580" font-family="JetBrains Mono,monospace" font-size="11">LIGHT  #FFFCF0  +  #205EA6</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#D14D41"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#879A39"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#D0A215"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#205EA6"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#CE5D97"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#3AA99F"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#205EA6"/>
+</g>
+<g transform="translate(456 302)">
+<rect width="400" height="168" rx="13" fill="#282828" stroke="#7daea3" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#d4be98" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Gruvbox</text>
+<text x="20" y="59" fill="#7c6f64" font-family="JetBrains Mono,monospace" font-size="11">DARK  #282828  +  #7daea3</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#ea6962"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#a9b665"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#d8a657"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#7daea3"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#d3869b"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#89b482"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#7daea3"/>
+</g>
+<g transform="translate(878 302)">
+<rect width="400" height="168" rx="13" fill="#0B0C16" stroke="#82FB9C" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#ddf7ff" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Hackerman</text>
+<text x="20" y="59" fill="#6a6e95" font-family="JetBrains Mono,monospace" font-size="11">DARK  #0B0C16  +  #82FB9C</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#50f872"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#4fe88f"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#50f7d4"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#829dd4"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#86a7df"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#7cf8f7"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#82FB9C"/>
+</g>
+<g transform="translate(1300 302)">
+<rect width="400" height="168" rx="13" fill="#1f1f28" stroke="#dcd7ba" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#dcd7ba" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Kanagawa</text>
+<text x="20" y="59" fill="#727169" font-family="JetBrains Mono,monospace" font-size="11">DARK  #1f1f28  +  #dcd7ba</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#c34043"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#76946a"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#c0a36e"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#7e9cd8"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#957fb8"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#6a9589"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#dcd7ba"/>
+</g>
+<g transform="translate(34 492)">
+<rect width="400" height="168" rx="13" fill="#0c0b0c" stroke="#b59790" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#FAFCFB" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Last Horizon</text>
+<text x="20" y="59" fill="#584e51" font-family="JetBrains Mono,monospace" font-size="11">DARK  #0c0b0c  +  #b59790</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#c38b7b"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#87a9b0"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#6B5E73"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#b59790"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#c4d8e2"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#a5a0b6"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#b59790"/>
+</g>
+<g transform="translate(456 492)">
+<rect width="400" height="168" rx="13" fill="#16242d" stroke="#8bc9eb" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#d6e2ee" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Lumon</text>
+<text x="20" y="59" fill="#4d86b0" font-family="JetBrains Mono,monospace" font-size="11">DARK  #16242d  +  #8bc9eb</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#4d86b0"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#5e95bc"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#6fa4c9"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#6fb8e3"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#8bc9eb"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#b4e4f6"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#8bc9eb"/>
+</g>
+<g transform="translate(878 492)">
+<rect width="400" height="168" rx="13" fill="#fafafa" stroke="#3264eb" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#212121" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Lupine</text>
+<text x="20" y="59" fill="#757575" font-family="JetBrains Mono,monospace" font-size="11">LIGHT  #fafafa  +  #3264eb</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#c900c4"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#4a2fd0"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#026fde"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#3264eb"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#8a4ad7"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#0c67de"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#3264eb"/>
+</g>
+<g transform="translate(1300 492)">
+<rect width="400" height="168" rx="13" fill="#121212" stroke="#e68e0d" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#bebebe" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Matte Black</text>
+<text x="20" y="59" fill="#555555" font-family="JetBrains Mono,monospace" font-size="11">DARK  #121212  +  #e68e0d</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#D35F5F"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#FFC107"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#b91c1c"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#e68e0d"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#D35F5F"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#bebebe"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#e68e0d"/>
+</g>
+<g transform="translate(34 682)">
+<rect width="400" height="168" rx="13" fill="#222222" stroke="#78824b" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#c2c2b0" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Miasma</text>
+<text x="20" y="59" fill="#555555" font-family="JetBrains Mono,monospace" font-size="11">DARK  #222222  +  #78824b</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#685742"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#5f875f"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#b36d43"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#78824b"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#bb7744"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#c9a554"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#78824b"/>
+</g>
+<g transform="translate(456 682)">
+<rect width="400" height="168" rx="13" fill="#2e3440" stroke="#81a1c1" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#d8dee9" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Nord</text>
+<text x="20" y="59" fill="#667080" font-family="JetBrains Mono,monospace" font-size="11">DARK  #2e3440  +  #81a1c1</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#bf616a"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#a3be8c"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#ebcb8b"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#81a1c1"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#b48ead"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#88c0d0"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#81a1c1"/>
+</g>
+<g transform="translate(878 682)">
+<rect width="400" height="168" rx="13" fill="#111c18" stroke="#509475" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#C1C497" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Osaka Jade</text>
+<text x="20" y="59" fill="#81B8A8" font-family="JetBrains Mono,monospace" font-size="11">DARK  #111c18  +  #509475</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#FF5345"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#549e6a"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#459451"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#509475"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#D2689C"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#2DD5B7"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#509475"/>
+</g>
+<g transform="translate(1300 682)">
+<rect width="400" height="168" rx="13" fill="#05182e" stroke="#faa968" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#f6dcac" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Retro 82</text>
+<text x="20" y="59" fill="#3f8f8a" font-family="JetBrains Mono,monospace" font-size="11">DARK  #05182e  +  #faa968</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#f85525"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#028391"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#e97b3c"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#3f8f8a"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#3f8f8a"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#8cbfb8"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#faa968"/>
+</g>
+<g transform="translate(34 872)">
+<rect width="400" height="168" rx="13" fill="#2c2525" stroke="#f38d70" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#e6d9db" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Ristretto</text>
+<text x="20" y="59" fill="#72696a" font-family="JetBrains Mono,monospace" font-size="11">DARK  #2c2525  +  #f38d70</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#fd6883"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#adda78"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#f9cc6c"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#f38d70"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#a8a9eb"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#85dacc"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#f38d70"/>
+</g>
+<g transform="translate(456 872)">
+<rect width="400" height="168" rx="13" fill="#faf4ed" stroke="#56949f" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#575279" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Rose Pine</text>
+<text x="20" y="59" fill="#9893a5" font-family="JetBrains Mono,monospace" font-size="11">LIGHT  #faf4ed  +  #56949f</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#b4637a"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#286983"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#ea9d34"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#56949f"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#907aa9"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#d7827e"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#56949f"/>
+</g>
+<g transform="translate(878 872)">
+<rect width="400" height="168" rx="13" fill="#101315" stroke="#798186" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#cacccc" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Solitude</text>
+<text x="20" y="59" fill="#4b4e55" font-family="JetBrains Mono,monospace" font-size="11">DARK  #101315  +  #798186</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#565d60"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#9fa5a9"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#d9dbdc"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#798186"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#aeaeae"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#707070"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#798186"/>
+</g>
+<g transform="translate(1300 872)">
+<rect width="400" height="168" rx="13" fill="#1a1b26" stroke="#7aa2f7" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#a9b1d6" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Tokyo Night</text>
+<text x="20" y="59" fill="#565f89" font-family="JetBrains Mono,monospace" font-size="11">DARK  #1a1b26  +  #7aa2f7</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#f7768e"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#9ece6a"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#e0af68"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#7aa2f7"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#ad8ee6"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#449dab"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#7aa2f7"/>
+</g>
+<g transform="translate(34 1062)">
+<rect width="400" height="168" rx="13" fill="#000000" stroke="#8d8d8d" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#ffffff" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">Vantablack</text>
+<text x="20" y="59" fill="#505050" font-family="JetBrains Mono,monospace" font-size="11">DARK  #000000  +  #8d8d8d</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#a4a4a4"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#b6b6b6"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#cecece"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#8d8d8d"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#9b9b9b"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#b0b0b0"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#8d8d8d"/>
+</g>
+<g transform="translate(456 1062)">
+<rect width="400" height="168" rx="13" fill="#ffffff" stroke="#6e6e6e" stroke-opacity=".72"/>
+<text x="20" y="35" fill="#000000" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700">White</text>
+<text x="20" y="59" fill="#c0c0c0" font-family="JetBrains Mono,monospace" font-size="11">LIGHT  #ffffff  +  #6e6e6e</text>
+<rect x="20" y="89" width="46" height="46" rx="8" fill="#2a2a2a"/>
+<rect x="78" y="89" width="46" height="46" rx="8" fill="#3a3a3a"/>
+<rect x="136" y="89" width="46" height="46" rx="8" fill="#4a4a4a"/>
+<rect x="194" y="89" width="46" height="46" rx="8" fill="#1a1a1a"/>
+<rect x="252" y="89" width="46" height="46" rx="8" fill="#2e2e2e"/>
+<rect x="310" y="89" width="46" height="46" rx="8" fill="#3e3e3e"/>
+<rect x="20" y="146" width="360" height="3" rx="2" fill="#6e6e6e"/>
+</g>
+</svg>

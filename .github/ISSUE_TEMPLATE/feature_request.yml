@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement to the Kali/Xfce adaptation
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem or use case
+      description: Explain the problem this feature would solve.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you expect it to work on Kali Xfce.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Area
+      options:
+        - Theme or wallpaper
+        - Installer or restore
+        - Menu or hotkey
+        - Terminal or shell
+        - Editor or TUI
+        - Documentation
+        - Other
+    validations:
+      required: true

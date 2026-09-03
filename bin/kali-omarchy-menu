@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+APP_DIR="${KALI_OMARCHY_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/kali-omarchy}"
+ROFI_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/kali-omarchy.rasi"
+[[ -r "$ROFI_CONFIG" ]] || ROFI_CONFIG="$APP_DIR/rofi/kali-omarchy.rasi"
+
+have_gui() { command -v rofi >/dev/null 2>&1 && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; }
+
+choose() {
+  local prompt="$1"
+  local -a items=()
+  mapfile -t items
+  if have_gui; then printf '%s\n' "${items[@]}" | rofi -dmenu -i -p "$prompt" -theme "$ROFI_CONFIG"
+  else
+    printf 'Kali Omarchy — %s\n' "$prompt" >&2
+    printf '%s\n' "${items[@]}" | nl -w2 -s') ' >&2
+    printf 'Choose a number: ' >&2
+    local answer; read -r answer
+    [[ "$answer" =~ ^[0-9]+$ && "$answer" -ge 1 && "$answer" -le ${#items[@]} ]] || return 1
+    printf '%s\n' "${items[$((answer-1))]}"
+  fi
+}
+
+confirm() {
+  local prompt="$1"
+  if have_gui; then
+    [[ "$(printf 'Cancel\n%s\n' "$prompt" | choose Confirm)" == "$prompt" ]]
+  else
+    printf '%s [y/N] ' "$prompt" >&2
+    local answer; read -r answer; [[ "$answer" =~ ^[Yy]$ ]]
+  fi
+}
+
+run_menu() {
+  local menu="${1:-root}" choice duration message
+  case "$menu" in
+    root)
+      choice="$(printf '%s\n' 'Applications' 'Style' 'System' 'Capture' 'Toggles' 'Reminder' 'Hotkeys' | choose 'Kali Omarchy')" || return
+      case "$choice" in
+        Applications) exec "$APP_DIR/bin/kali-omarchy-launcher" ;;
+        Style) run_menu style ;; System) run_menu system ;; Capture) run_menu capture ;;
+        Toggles) run_menu toggle ;; Reminder) run_menu reminder ;;
+        Hotkeys) kali-omarchy hotkeys --window ;;
+      esac ;;
+    apps) exec "$APP_DIR/bin/kali-omarchy-launcher" ;;
+    style)
+      choice="$(printf '%s\n' 'Choose theme' 'Next theme' 'Previous theme' 'Choose background' 'Next background' 'Choose monospace font' | choose Style)" || return
+      case "$choice" in
+        'Choose theme') kali-omarchy theme ;; 'Next theme') kali-omarchy theme next ;;
+        'Previous theme') kali-omarchy theme previous ;; 'Choose background') kali-omarchy background ;;
+        'Next background') kali-omarchy background next ;;
+        'Choose monospace font')
+          choice="$(kali-omarchy font list | choose Font)" || return
+          [[ -n "$choice" ]] && kali-omarchy font set "$choice" ;;
+      esac ;;
+    system)
+      choice="$(printf '%s\n' 'Lock' 'Settings' 'Activity monitor' 'Terminal' 'Tmux' 'Log out' 'Restart' 'Power off' | choose System)" || return
+      case "$choice" in
+        Lock) xflock4 ;; Settings) kali-omarchy launch settings ;;
+        'Activity monitor') kali-omarchy launch activity ;; Terminal) kali-omarchy launch terminal ;;
+        Tmux) kali-omarchy launch tmux ;;
+        'Log out') confirm 'Log out' && xfce4-session-logout --logout ;;
+        Restart) confirm 'Restart' && xfce4-session-logout --reboot ;;
+        'Power off') confirm 'Power off' && xfce4-session-logout --halt ;;
+      esac ;;
+    capture)
+      choice="$(printf '%s\n' 'Region screenshot' 'Full screenshot' 'Window screenshot' 'OCR to clipboard' 'QR code to clipboard' 'Screen recorder' | choose Capture)" || return
+      case "$choice" in
+        'Region screenshot') kali-omarchy capture screenshot region ;;
+        'Full screenshot') kali-omarchy capture screenshot full ;;
+        'Window screenshot') kali-omarchy capture screenshot window ;;
+        'OCR to clipboard') kali-omarchy capture ocr ;;
+        'QR code to clipboard') kali-omarchy capture qr ;;
+        'Screen recorder') kali-omarchy capture record ;;
+      esac ;;
+    toggle)
+      choice="$(printf '%s\n' 'Do not disturb' 'Night light' 'Stay awake' 'Panel' 'Compositor' | choose Toggles)" || return
+      case "$choice" in
+        'Do not disturb') kali-omarchy toggle dnd ;; 'Night light') kali-omarchy toggle nightlight ;;
+        'Stay awake') kali-omarchy toggle idle ;; Panel) kali-omarchy toggle panel ;;
+        Compositor) kali-omarchy toggle compositor ;;
+      esac ;;
+    reminder)
+      duration="$(printf '%s\n' '5m' '10m' '30m' '1h' '2h' | choose 'Remind in')" || return
+      [[ -n "$duration" ]] || return
+      if have_gui; then message="$(printf '' | choose 'Reminder text')" || return
+      else printf 'Reminder text: ' >&2; read -r message; fi
+      [[ -n "$message" ]] && kali-omarchy reminder add "$duration" "$message" ;;
+    *) printf 'Unknown menu: %s\n' "$menu" >&2; return 2 ;;
+  esac
+}
+
+run_menu "${1:-root}"

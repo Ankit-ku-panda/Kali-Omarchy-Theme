@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible Kali Omarchy problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Before reporting, run `kali-omarchy doctor` and remove any secrets from the output.
+  - type: input
+    id: version
+    attributes:
+      label: Kali Omarchy version
+      placeholder: 2.0.1
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Kali rolling, Xfce 4.x, physical machine or VM
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the exact command, complete error, and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ...
+        2. Select ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Paste `kali-omarchy doctor` output with personal information removed.
+      render: shell

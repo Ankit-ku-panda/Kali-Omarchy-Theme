@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Kali Omarchy
+Comment=An Omarchy-inspired midnight theme for Kali Xfce
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Kali-Omarchy
+MetacityTheme=Kali-Dark
+IconTheme=Papirus-Dark
+CursorTheme=Adwaita
+ButtonLayout=menu:minimize,maximize,close
+

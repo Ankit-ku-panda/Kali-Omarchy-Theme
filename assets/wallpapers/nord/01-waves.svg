@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#191c23"/><stop offset="1" stop-color="#2e3440"/></linearGradient>
+ <radialGradient id="glow" cx="75%" cy="18%" r="70%"><stop stop-color="#81a1c1" stop-opacity=".32"/><stop offset="1" stop-color="#2e3440" stop-opacity="0"/></radialGradient>
+ <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#d8dee9" stroke-opacity=".035"/></pattern>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/><rect width="1920" height="1080" fill="url(#glow)"/><rect width="1920" height="1080" fill="url(#grid)"/>
+<path d="M-100 820C300 650 500 1010 850 755s590-250 1170-65" fill="none" stroke="#81a1c1" stroke-opacity=".17" stroke-width="90"/>
+<path d="M-120 820C300 640 500 995 850 745s610-245 1190-60" fill="none" stroke="#d8dee9" stroke-opacity=".55" stroke-width="2"/>
+<path d="M-80 870C320 700 520 1040 870 795s600-230 1140-40" fill="none" stroke="#b48ead" stroke-opacity=".24"/>
+<g transform="translate(120 900)"><rect width="42" height="2" rx="1" fill="#81a1c1"/><text y="36" fill="#d8dee9" font-family="JetBrains Mono,monospace" font-size="18" letter-spacing="5">KALI // OMARCHY</text><text y="66" fill="#667080" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="3">NORD</text></g>
+</svg>

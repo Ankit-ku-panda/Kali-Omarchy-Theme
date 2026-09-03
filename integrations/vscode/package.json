@@ -1,0 +1,127 @@
+{
+  "name": "kali-omarchy-themes",
+  "displayName": "Kali Omarchy Themes",
+  "description": "The 22 Omarchy palettes adapted for Kali Linux.",
+  "version": "2.0.0",
+  "publisher": "ankit-kumar-panda",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Kali Omarchy \u2014 Catppuccin",
+        "uiTheme": "vs-dark",
+        "path": "./themes/catppuccin.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Catppuccin Latte",
+        "uiTheme": "vs",
+        "path": "./themes/catppuccin-latte.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Ethereal",
+        "uiTheme": "vs-dark",
+        "path": "./themes/ethereal.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Everforest",
+        "uiTheme": "vs-dark",
+        "path": "./themes/everforest.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Flexoki Light",
+        "uiTheme": "vs",
+        "path": "./themes/flexoki-light.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Gruvbox",
+        "uiTheme": "vs-dark",
+        "path": "./themes/gruvbox.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Hackerman",
+        "uiTheme": "vs-dark",
+        "path": "./themes/hackerman.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Kanagawa",
+        "uiTheme": "vs-dark",
+        "path": "./themes/kanagawa.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Last Horizon",
+        "uiTheme": "vs-dark",
+        "path": "./themes/last-horizon.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Lumon",
+        "uiTheme": "vs-dark",
+        "path": "./themes/lumon.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Lupine",
+        "uiTheme": "vs",
+        "path": "./themes/lupine.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Matte Black",
+        "uiTheme": "vs-dark",
+        "path": "./themes/matte-black.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Miasma",
+        "uiTheme": "vs-dark",
+        "path": "./themes/miasma.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Nord",
+        "uiTheme": "vs-dark",
+        "path": "./themes/nord.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Osaka Jade",
+        "uiTheme": "vs-dark",
+        "path": "./themes/osaka-jade.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Retro 82",
+        "uiTheme": "vs-dark",
+        "path": "./themes/retro-82.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Ristretto",
+        "uiTheme": "vs-dark",
+        "path": "./themes/ristretto.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Rose Pine",
+        "uiTheme": "vs",
+        "path": "./themes/rose-pine.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Solitude",
+        "uiTheme": "vs-dark",
+        "path": "./themes/solitude.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Tokyo Night",
+        "uiTheme": "vs-dark",
+        "path": "./themes/tokyo-night.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 Vantablack",
+        "uiTheme": "vs-dark",
+        "path": "./themes/vantablack.json"
+      },
+      {
+        "label": "Kali Omarchy \u2014 White",
+        "uiTheme": "vs",
+        "path": "./themes/white.json"
+      }
+    ]
+  }
+}

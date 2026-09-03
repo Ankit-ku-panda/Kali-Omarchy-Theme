@@ -1,0 +1,91 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    display-drun: " Apps";
+    display-run: " Run";
+    display-window: " Windows";
+    drun-display-format: "{name}";
+    font: "JetBrains Mono 12";
+}
+
+* {
+    bg: #0b0d14ee;
+    bg-alt: #1a1b26ff;
+    surface: #24283bff;
+    border: #414868ff;
+    fg: #c0caf5ff;
+    muted: #737aa2ff;
+    accent: #7aa2f7ff;
+    urgent: #f7768eff;
+    transparent: #00000000;
+}
+
+window {
+    width: 680px;
+    border: 2px;
+    border-color: @border;
+    border-radius: 14px;
+    background-color: @bg;
+    padding: 18px;
+}
+
+mainbox {
+    spacing: 14px;
+    background-color: @transparent;
+}
+
+inputbar {
+    spacing: 10px;
+    padding: 12px 14px;
+    border: 1px;
+    border-color: @border;
+    border-radius: 10px;
+    background-color: @bg-alt;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+    background-color: @transparent;
+}
+
+entry {
+    placeholder: "Search applications…";
+    placeholder-color: @muted;
+    text-color: @fg;
+    background-color: @transparent;
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 4px;
+    background-color: @transparent;
+}
+
+element {
+    padding: 10px 12px;
+    spacing: 12px;
+    border-radius: 9px;
+    background-color: @transparent;
+    text-color: @fg;
+}
+
+element selected {
+    background-color: @surface;
+    text-color: @accent;
+}
+
+element-icon {
+    size: 28px;
+    background-color: @transparent;
+}
+
+element-text {
+    vertical-align: 0.5;
+    background-color: @transparent;
+    text-color: inherit;
+}
+

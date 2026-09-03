@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs>
+ <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#211b1b"/><stop offset="1" stop-color="#2c2525"/></linearGradient>
+ <radialGradient id="orb"><stop stop-color="#f38d70" stop-opacity=".72"/><stop offset=".45" stop-color="#f38d70" stop-opacity=".18"/><stop offset="1" stop-color="#2c2525" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/><circle cx="1450" cy="320" r="430" fill="url(#orb)"/>
+<g fill="none" stroke="#e6d9db" stroke-opacity=".10"><ellipse cx="1420" cy="340" rx="560" ry="205" transform="rotate(-18 1420 340)"/><ellipse cx="1420" cy="340" rx="420" ry="145" transform="rotate(-18 1420 340)"/><ellipse cx="1420" cy="340" rx="270" ry="90" transform="rotate(-18 1420 340)"/></g>
+<circle cx="1045" cy="486" r="7" fill="#e6d9db"/><circle cx="1630" cy="194" r="4" fill="#a8a9eb"/>
+<g transform="translate(120 900)"><rect width="42" height="2" rx="1" fill="#f38d70"/><text y="36" fill="#e6d9db" font-family="JetBrains Mono,monospace" font-size="18" letter-spacing="5">KALI // OMARCHY</text><text y="66" fill="#72696a" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="3">RISTRETTO / ORBIT</text></g>
+</svg>

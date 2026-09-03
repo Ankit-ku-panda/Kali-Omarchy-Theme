@@ -1,0 +1,754 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+VERSION="2.0.1"
+APP_DIR="${KALI_OMARCHY_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/kali-omarchy}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/kali-omarchy"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/kali-omarchy"
+ACTIVE_BACKUP_FILE="$STATE_DIR/active-backup"
+ENGINE="$APP_DIR/lib/theme_engine.py"
+BUNDLED_THEMES="$APP_DIR/themes"
+CUSTOM_THEMES="$CONFIG_DIR/themes"
+GENERATED_DIR="$CONFIG_DIR/generated"
+CURRENT_THEME_FILE="$CONFIG_DIR/current-theme"
+CURRENT_BACKGROUND_FILE="$CONFIG_DIR/current-background"
+ROFI_CONFIG="$HOME/.config/rofi/kali-omarchy.rasi"
+QTERMINAL_CONFIG="$HOME/.config/qterminal.org/qterminal.ini"
+XFCE_TERMINAL_CONFIG="$HOME/.config/xfce4/terminal/terminalrc"
+GTK_THEME_DIR="$HOME/.themes/Kali-Omarchy"
+DEFAULT_THEME="tokyo-night"
+
+blue='\033[38;2;122;162;247m'; green='\033[38;2;158;206;106m'
+yellow='\033[38;2;224;175;104m'; red='\033[38;2;247;118;142m'
+muted='\033[38;2;86;95;137m'; bold='\033[1m'; reset='\033[0m'
+info() { printf '%b\n' "${blue}::${reset} $*"; }
+ok() { printf '%b\n' "${green}::${reset} $*"; }
+warn() { printf '%b\n' "${yellow}:: warning:${reset} $*" >&2; }
+die() { printf '%b\n' "${red}:: error:${reset} $*" >&2; exit 1; }
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a "Kali Omarchy" "Kali Omarchy" "$*" 2>/dev/null || true; }
+
+usage() {
+  cat <<'EOF'
+Kali Omarchy command center
+
+Usage:
+  kali-omarchy <command> [arguments]
+
+Commands:
+  menu [root|apps|style|system|capture|toggle]
+  theme [list|set <name>|next|previous|install <git-url>|remove <name>]
+  background [list|set <file>|next|previous|add <file>]
+  font [list|set <family>]
+  launch <terminal|tmux|browser|files|editor|activity|settings>
+  window <close|fullscreen>
+  workspace <switch|move> <number> | <next|previous>
+  toggle <dnd|nightlight|idle|panel|compositor> [status]
+  capture <screenshot|ocr|qr|record> [mode]
+  reminder <add <duration> <message>|list|clear|prompt>
+  notice <datetime|battery|weather|about>
+  hotkeys [--window]
+  apply [theme]     Apply/repair the current or named theme
+  restore           Restore every pre-install setting
+  status            Show the active theme and integration status
+  doctor            Check the Kali/Xfce environment and dependencies
+  uninstall         Restore settings and remove Kali Omarchy
+  version            Print version information
+
+Examples:
+  kali-omarchy theme set nord
+  kali-omarchy background next
+  kali-omarchy reminder add 10m "Check the scan"
+EOF
+}
+
+require_installation() {
+  [[ -x "$ENGINE" && -d "$BUNDLED_THEMES" ]] || die "Kali Omarchy files are incomplete. Run install.sh again."
+}
+
+require_normal_user() {
+  if ((EUID == 0)) && [[ "${KALI_OMARCHY_TEST_MODE:-0}" != 1 ]]; then
+    die "Run Kali Omarchy as your normal desktop user, not root. Type 'exit' first if necessary."
+  fi
+}
+
+guard_user_path() {
+  local path="$1" resolved home_resolved
+  resolved="$(realpath -m -- "$path")"; home_resolved="$(realpath -m -- "$HOME")"
+  [[ "$resolved" == "$home_resolved/"* ]] || die "Refusing unsafe path outside your home: $path"
+}
+
+valid_theme_name() { [[ "$1" =~ ^[a-z0-9][a-z0-9._+-]*$ ]]; }
+
+current_theme() {
+  if [[ -r "$CURRENT_THEME_FILE" ]]; then
+    local name; name="$(<"$CURRENT_THEME_FILE")"
+    theme_root "$name" >/dev/null 2>&1 && { printf '%s\n' "$name"; return; }
+  fi
+  printf '%s\n' "$DEFAULT_THEME"
+}
+
+theme_root() {
+  local name="$1"
+  valid_theme_name "$name" || return 1
+  if [[ -r "$CUSTOM_THEMES/$name/colors.toml" ]]; then printf '%s\n' "$CUSTOM_THEMES"
+  elif [[ -r "$BUNDLED_THEMES/$name/colors.toml" ]]; then printf '%s\n' "$BUNDLED_THEMES"
+  else return 1; fi
+}
+
+list_themes() {
+  { find "$BUNDLED_THEMES" -mindepth 2 -maxdepth 2 -name colors.toml -printf '%h\n' 2>/dev/null
+    find "$CUSTOM_THEMES" -mindepth 2 -maxdepth 2 -name colors.toml -printf '%h\n' 2>/dev/null || true; } |
+    xargs -r -n1 basename | sort -u
+}
+
+display_name() { printf '%s' "$1" | tr '-' ' ' | sed -E 's/(^| )([[:lower:]])/\1\u\2/g'; }
+
+new_backup() {
+  mkdir -p "$STATE_DIR/backups"
+  local stamp backup
+  stamp="$(date +%Y%m%d-%H%M%S)"; backup="$STATE_DIR/backups/$stamp"
+  mkdir -p "$backup/files"; : >"$backup/files.tsv"; : >"$backup/xfconf.tsv"
+  printf '%s\n' "$backup" >"$ACTIVE_BACKUP_FILE"
+  printf '%s\n' "$backup"
+}
+
+active_backup() {
+  [[ -r "$ACTIVE_BACKUP_FILE" ]] || return 1
+  local backup; backup="$(<"$ACTIVE_BACKUP_FILE")"
+  [[ "$backup" == "$STATE_DIR/backups/"* && -d "$backup" ]] || return 1
+  printf '%s\n' "$backup"
+}
+
+ensure_backup() {
+  local backup
+  if backup="$(active_backup 2>/dev/null)"; then printf '%s\n' "$backup"
+  else new_backup; fi
+}
+
+backup_file_once() {
+  local backup="$1" path="$2" relative
+  guard_user_path "$path"
+  grep -Fq $'\t'"$path" "$backup/files.tsv" 2>/dev/null && return 0
+  if [[ -e "$path" || -L "$path" ]]; then
+    relative="${path#/}"; mkdir -p "$backup/files/$(dirname -- "$relative")"
+    cp -a -- "$path" "$backup/files/$relative"; printf 'present\t%s\n' "$path" >>"$backup/files.tsv"
+  else
+    printf 'absent\t%s\n' "$path" >>"$backup/files.tsv"
+  fi
+}
+
+b64_encode() { local e; e="$(printf '%s' "$1" | base64 | tr -d '\n')"; printf '%s' "${e:--}"; }
+b64_decode() { [[ "$1" == - ]] || printf '%s' "$1" | base64 --decode; }
+
+record_xfconf_once() {
+  local backup="$1" channel="$2" property="$3" type="$4" value encoded key
+  key=$'\t'"$channel"$'\t'"$property"$'\t'
+  grep -Fq "$key" "$backup/xfconf.tsv" 2>/dev/null && return 0
+  if value="$(xfconf-query -c "$channel" -p "$property" 2>/dev/null)"; then
+    encoded="$(b64_encode "$value")"
+    printf 'present\t%s\t%s\t%s\t%s\n' "$channel" "$property" "$type" "$encoded" >>"$backup/xfconf.tsv"
+  else
+    printf 'absent\t%s\t%s\t%s\t-\n' "$channel" "$property" "$type" >>"$backup/xfconf.tsv"
+  fi
+}
+
+set_xfconf() {
+  local channel="$1" property="$2" type="$3" value="$4"
+  if xfconf-query -c "$channel" -p "$property" >/dev/null 2>&1; then
+    xfconf-query -c "$channel" -p "$property" -s "$value" >/dev/null
+  else
+    xfconf-query -c "$channel" -p "$property" -n -t "$type" -s "$value" >/dev/null
+  fi
+}
+
+xfce_available() {
+  command -v xfconf-query >/dev/null 2>&1 &&
+    { [[ "${XDG_CURRENT_DESKTOP:-}" == *XFCE* ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == *Xfce* ]] || pgrep -x xfconfd >/dev/null 2>&1; }
+}
+xfconf_ready() { command -v xfconf-query >/dev/null 2>&1 && xfconf-query -c xsettings -l >/dev/null 2>&1; }
+
+append_source_block() {
+  local file="$1" fragment="$2" shell_name="$3" tmp
+  touch "$file"; tmp="$(mktemp "${file}.XXXXXX")"
+  awk '$0=="# >>> kali-omarchy >>>"{skip=1;next}$0=="# <<< kali-omarchy <<<"{skip=0;next}!skip{print}' "$file" >"$tmp"
+  cat >>"$tmp" <<EOF
+
+# >>> kali-omarchy >>>
+# Managed by Kali Omarchy. Restore with: kali-omarchy restore
+[[ -r "$fragment" ]] && source "$fragment"
+# <<< kali-omarchy <<<
+EOF
+  mv -- "$tmp" "$file"; info "$shell_name integration configured"
+}
+
+append_tmux_block() {
+  local file="$1" fragment="$2" tmp
+  touch "$file"; tmp="$(mktemp "${file}.XXXXXX")"
+  awk '$0=="# >>> kali-omarchy >>>"{skip=1;next}$0=="# <<< kali-omarchy <<<"{skip=0;next}!skip{print}' "$file" >"$tmp"
+  cat >>"$tmp" <<EOF
+
+# >>> kali-omarchy >>>
+# Managed by Kali Omarchy. Restore with: kali-omarchy restore
+source-file "$fragment"
+# <<< kali-omarchy <<<
+EOF
+  mv -- "$tmp" "$file"; info "Tmux integration configured"
+}
+
+configure_ini() {
+  local target="$1" kind="$2" manifest="$3" font
+  font="$(current_font)"
+  mkdir -p "$(dirname -- "$target")"
+  python3 - "$target" "$kind" "$manifest" "$font" <<'PY'
+import configparser, json, os, sys
+path, kind, manifest_path, font = sys.argv[1:]
+data = json.load(open(manifest_path, encoding="utf-8")); c=data["colors"]; pal=data["terminal_palette"]
+cfg=configparser.RawConfigParser(strict=False); cfg.optionxform=str
+if os.path.exists(path):
+    try: cfg.read(path, encoding="utf-8")
+    except configparser.Error: pass
+def setv(section,key,value):
+    if not cfg.has_section(section): cfg.add_section(section)
+    cfg.set(section,key,str(value))
+if kind=="qterminal":
+    for k,v in {"colorScheme":"Kali-Omarchy","fontFamily":font,"fontSize":"11","TerminalTransparency":"8","HideTabBarWithOneTab":"true","MenuVisible":"false","ScrollbarPosition":"0","Term":"xterm-256color"}.items(): setv("General",k,v)
+    setv("MainWindow","ApplicationTransparency","2")
+elif kind=="xfce-terminal":
+    values={"ColorBackground":c["background"],"ColorForeground":c["foreground"],"ColorCursor":c["accent"],"ColorSelectionBackground":c["selection"],"ColorPalette":";".join(pal),"FontName":font+" 11","FontUseSystem":"FALSE","MiscMenubarDefault":"FALSE","MiscToolbarDefault":"FALSE","MiscBordersDefault":"FALSE","BackgroundMode":"TERMINAL_BACKGROUND_TRANSPARENT","BackgroundDarkness":"0.92","ScrollingBar":"TERMINAL_SCROLLBAR_NONE"}
+    for k,v in values.items(): setv("Configuration",k,v)
+with open(path,"w",encoding="utf-8") as out: cfg.write(out,space_around_delimiters=False)
+PY
+}
+
+current_font() { [[ -r "$CONFIG_DIR/font" ]] && cat "$CONFIG_DIR/font" || printf 'JetBrainsMono Nerd Font'; }
+
+update_simple_setting() {
+  local file="$1" key="$2" value="$3"
+  mkdir -p "$(dirname -- "$file")"
+  python3 - "$file" "$key" "$value" <<'PY'
+import os,re,sys
+path,key,value=sys.argv[1:]
+text=open(path,encoding="utf-8").read() if os.path.exists(path) else ""
+pattern=re.compile(r"^\s*"+re.escape(key)+r"\s*=.*$",re.M)
+line=f'{key} = "{value}"'
+text=pattern.sub(line,text,count=1) if pattern.search(text) else text.rstrip()+("\n" if text.strip() else "")+line+"\n"
+open(path,"w",encoding="utf-8").write(text)
+PY
+}
+
+configure_vscode_setting() {
+  local file="$1" label="$2"
+  mkdir -p "$(dirname -- "$file")"
+  python3 - "$file" "$label" <<'PY'
+import json,os,sys
+path,label=sys.argv[1:]
+try:
+    data=json.load(open(path,encoding="utf-8")) if os.path.exists(path) else {}
+except (json.JSONDecodeError,OSError):
+    print(f"warning: skipped {path}; it contains JSON-with-comments",file=sys.stderr); raise SystemExit(2)
+data["workbench.colorTheme"]=label
+with open(path,"w",encoding="utf-8") as out: json.dump(data,out,indent=2); out.write("\n")
+PY
+}
+
+install_generated_integrations() {
+  local backup="$1" manifest="$GENERATED_DIR/manifest.json" target label theme
+  theme="$(<"$CURRENT_THEME_FILE")"; label="Kali Omarchy — $(display_name "$theme")"
+  local -a files=(
+    "$GTK_THEME_DIR" "$ROFI_CONFIG" "$QTERMINAL_CONFIG" "$XFCE_TERMINAL_CONFIG"
+    "$HOME/.local/share/qtermwidget5/color-schemes/Kali-Omarchy.colorscheme"
+    "$HOME/.local/share/qtermwidget6/color-schemes/Kali-Omarchy.colorscheme"
+    "$HOME/.config/btop/btop.conf" "$HOME/.config/btop/themes/kali-omarchy.theme"
+    "$HOME/.config/nvim/colors/kali-omarchy.vim" "$HOME/.config/nvim/plugin/kali-omarchy.lua"
+    "$HOME/.tmux.conf" "$HOME/.config/tmux/kali-omarchy.conf"
+    "$HOME/.vscode/extensions/ankit-kumar-panda.kali-omarchy-themes-2.0.0"
+    "$HOME/.config/Code/User/settings.json" "$HOME/.config/VSCodium/User/settings.json"
+  )
+  for target in "${files[@]}"; do backup_file_once "$backup" "$target"; done
+
+  mkdir -p "$GTK_THEME_DIR/gtk-3.0" "$GTK_THEME_DIR/gtk-4.0" "$(dirname -- "$ROFI_CONFIG")"
+  install -m644 "$GENERATED_DIR/gtk-3.0/gtk.css" "$GTK_THEME_DIR/gtk-3.0/gtk.css"
+  install -m644 "$GENERATED_DIR/gtk-4.0/gtk.css" "$GTK_THEME_DIR/gtk-4.0/gtk.css"
+  install -m644 "$APP_DIR/theme/index.theme" "$GTK_THEME_DIR/index.theme"
+  install -m644 "$GENERATED_DIR/rofi.rasi" "$ROFI_CONFIG"
+
+  for target in "$HOME/.local/share/qtermwidget5/color-schemes/Kali-Omarchy.colorscheme" "$HOME/.local/share/qtermwidget6/color-schemes/Kali-Omarchy.colorscheme"; do
+    mkdir -p "$(dirname -- "$target")"; install -m644 "$GENERATED_DIR/qterminal.colorscheme" "$target"
+  done
+  configure_ini "$QTERMINAL_CONFIG" qterminal "$manifest"
+  configure_ini "$XFCE_TERMINAL_CONFIG" xfce-terminal "$manifest"
+
+  mkdir -p "$HOME/.config/btop/themes"; install -m644 "$GENERATED_DIR/btop.theme" "$HOME/.config/btop/themes/kali-omarchy.theme"
+  update_simple_setting "$HOME/.config/btop/btop.conf" color_theme kali-omarchy
+
+  mkdir -p "$HOME/.config/nvim/colors" "$HOME/.config/nvim/plugin"
+  install -m644 "$GENERATED_DIR/kali-omarchy.vim" "$HOME/.config/nvim/colors/kali-omarchy.vim"
+  printf '%s\n' 'vim.schedule(function() pcall(vim.cmd.colorscheme, "kali-omarchy") end)' >"$HOME/.config/nvim/plugin/kali-omarchy.lua"
+
+  mkdir -p "$HOME/.config/tmux"; install -m644 "$APP_DIR/config/tmux.conf" "$HOME/.config/tmux/kali-omarchy.conf"
+  append_tmux_block "$HOME/.tmux.conf" "$HOME/.config/tmux/kali-omarchy.conf"
+
+  target="$HOME/.vscode/extensions/ankit-kumar-panda.kali-omarchy-themes-2.0.0"
+  mkdir -p "$target"; cp -a "$APP_DIR/integrations/vscode/." "$target/"
+  if command -v code >/dev/null 2>&1 || [[ -d "$HOME/.config/Code" ]]; then configure_vscode_setting "$HOME/.config/Code/User/settings.json" "$label" || true; fi
+  if command -v codium >/dev/null 2>&1 || [[ -d "$HOME/.config/VSCodium" ]]; then configure_vscode_setting "$HOME/.config/VSCodium/User/settings.json" "$label" || true; fi
+
+  backup_file_once "$backup" "$HOME/.zshrc"; backup_file_once "$backup" "$HOME/.bashrc"
+  append_source_block "$HOME/.zshrc" "$APP_DIR/shell/kali-omarchy.zsh" Zsh
+  append_source_block "$HOME/.bashrc" "$APP_DIR/shell/kali-omarchy.bash" Bash
+}
+
+wallpaper_dir_for() {
+  local name="$1"
+  if [[ -d "$CUSTOM_THEMES/$name/backgrounds" ]]; then printf '%s\n' "$CUSTOM_THEMES/$name/backgrounds"
+  else printf '%s\n' "$APP_DIR/assets/wallpapers/$name"; fi
+}
+
+resolve_wallpaper() {
+  local theme="$1" dir stored first
+  dir="$(wallpaper_dir_for "$theme")"
+  if [[ -r "$CURRENT_BACKGROUND_FILE" ]]; then
+    stored="$(<"$CURRENT_BACKGROUND_FILE")"
+    [[ "$stored" == "$dir/"* && -f "$stored" ]] && { printf '%s\n' "$stored"; return; }
+  fi
+  first="$(find "$dir" -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -print 2>/dev/null | sort | head -1)"
+  [[ -n "$first" ]] || return 1
+  printf '%s\n' "$first"
+}
+
+configure_xfce() {
+  local backup="$1" manifest="$GENERATED_DIR/manifest.json" wallpaper="$2" mode icon font
+  if ! xfce_available || ! xfconf_ready; then warn "Xfce session not detected; desktop and hotkey changes were skipped."; return; fi
+  mode="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["mode"])' "$manifest")"
+  icon=Papirus-Dark; [[ "$mode" == light ]] && icon=Papirus
+  font="$(current_font)"
+  [[ -d /usr/share/icons/$icon || -d "$HOME/.local/share/icons/$icon" ]] || icon=Flat-Remix-Blue-Dark
+
+  local -a settings=(
+    "xsettings|/Net/ThemeName|string|Kali-Omarchy"
+    "xsettings|/Net/IconThemeName|string|$icon"
+    "xsettings|/Gtk/MonospaceFontName|string|$font 11"
+    "xfwm4|/general/theme|string|Kali-Dark"
+    "xfwm4|/general/title_font|string|Sans Bold 10"
+    "xfce4-panel|/panels/panel-1/size|int|36"
+    "xfce4-panel|/panels/panel-1/length|int|100"
+    "xfce4-panel|/panels/panel-1/background-style|int|0"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>space|string|kali-omarchy menu"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Alt>space|string|kali-omarchy launcher"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary><Shift>space|string|kali-omarchy theme"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>space|string|kali-omarchy background"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>k|string|kali-omarchy hotkeys --window"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>Return|string|kali-omarchy launch terminal"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Alt>Return|string|kali-omarchy launch tmux"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Shift>Return|string|kali-omarchy launch browser"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Shift>f|string|kali-omarchy launch files"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>t|string|kali-omarchy launch activity"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>Escape|string|kali-omarchy menu system"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>l|string|xflock4"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>n|string|kali-omarchy toggle nightlight"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>comma|string|kali-omarchy toggle dnd"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>i|string|kali-omarchy toggle idle"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>r|string|kali-omarchy reminder prompt"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>v|string|xfce4-popup-clipman"
+    "xfce4-keyboard-shortcuts|/commands/custom/Print|string|kali-omarchy capture screenshot region"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super><Primary>Print|string|kali-omarchy capture ocr"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>f|string|kali-omarchy window fullscreen"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>w|string|kali-omarchy window close"
+    "xfce4-keyboard-shortcuts|/commands/custom/<Super>q|string|kali-omarchy window close"
+    "xfce4-terminal|/color-background|string|$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["colors"]["background"])' "$manifest")"
+    "xfce4-terminal|/color-foreground|string|$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["colors"]["foreground"])' "$manifest")"
+    "xfce4-terminal|/color-cursor|string|$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["colors"]["accent"])' "$manifest")"
+    "xfce4-terminal|/color-selection-background|string|$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["colors"]["selection"])' "$manifest")"
+    "xfce4-terminal|/color-palette|string|$(python3 -c 'import json,sys;print(";".join(json.load(open(sys.argv[1]))["terminal_palette"]))' "$manifest")"
+    "xfce4-terminal|/font-name|string|$font 11"
+    "xfce4-terminal|/font-use-system|bool|false"
+    "xfce4-terminal|/misc-menubar-default|bool|false"
+  )
+  local entry channel property type value n
+  for entry in "${settings[@]}"; do
+    IFS='|' read -r channel property type value <<<"$entry"
+    record_xfconf_once "$backup" "$channel" "$property" "$type"
+    [[ "$property" != /general/theme || -d /usr/share/themes/Kali-Dark ]] || value=Default
+    set_xfconf "$channel" "$property" "$type" "$value" || warn "Could not set Xfce property $property"
+  done
+  for n in 1 2 3 4; do
+    for entry in "/commands/custom/<Super>$n|kali-omarchy workspace switch $n" "/commands/custom/<Super><Shift>$n|kali-omarchy workspace move $n"; do
+      property="${entry%%|*}"; value="${entry#*|}"
+      record_xfconf_once "$backup" xfce4-keyboard-shortcuts "$property" string
+      set_xfconf xfce4-keyboard-shortcuts "$property" string "$value" || true
+    done
+  done
+  while IFS= read -r property; do
+    [[ -n "$property" ]] || continue
+    record_xfconf_once "$backup" xfce4-desktop "$property" string
+    set_xfconf xfce4-desktop "$property" string "$wallpaper" || true
+    value="${property%/*}/image-style"
+    record_xfconf_once "$backup" xfce4-desktop "$value" int
+    set_xfconf xfce4-desktop "$value" int 5 || true
+  done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/(last-image|image-path)$' || true)
+  command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload >/dev/null 2>&1 || true
+  command -v xfce4-panel >/dev/null 2>&1 && xfce4-panel -r >/dev/null 2>&1 || true
+}
+
+run_hooks() {
+  local event="$1" arg="${2:-}" hook
+  [[ -d "$CONFIG_DIR/hooks/$event.d" ]] || return 0
+  for hook in "$CONFIG_DIR/hooks/$event.d"/*; do [[ -f "$hook" && -x "$hook" ]] && "$hook" "$arg" || true; done
+}
+
+apply_theme() {
+  require_normal_user; require_installation
+  local name="${1:-$(current_theme)}" root backup staging wallpaper
+  root="$(theme_root "$name" 2>/dev/null)" || die "Unknown theme '$name'. Run: kali-omarchy theme list"
+  backup="$(ensure_backup)"; info "Restore point: $backup"
+  backup_file_once "$backup" "$CONFIG_DIR"
+  mkdir -p "$CONFIG_DIR"
+  staging="$(mktemp -d)"
+  python3 "$ENGINE" --themes-dir "$root" generate --theme "$name" --output "$staging"
+  mkdir -p "$GENERATED_DIR"; cp -a "$staging/." "$GENERATED_DIR/"
+  printf '%s\n' "$name" >"$CURRENT_THEME_FILE"
+  wallpaper="$(resolve_wallpaper "$name" 2>/dev/null || true)"
+  if [[ -n "$wallpaper" ]]; then printf '%s\n' "$wallpaper" >"$CURRENT_BACKGROUND_FILE"; fi
+  install_generated_integrations "$backup"
+  [[ -n "$wallpaper" ]] && configure_xfce "$backup" "$wallpaper" || warn "No wallpaper found for $name"
+  run_hooks theme-set "$name"
+  rm -rf -- "$staging"
+  notify "Theme changed to $(display_name "$name")"
+  ok "$(display_name "$name") is active. Open a new terminal; restart VS Code to refresh it."
+}
+
+theme_menu() {
+  local choice current; current="$(current_theme)"
+  if command -v rofi >/dev/null 2>&1 && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+    choice="$(list_themes | awk -v c="$current" '{print ($0==c?"● ":"  ") $0}' | rofi -dmenu -i -p 'Theme' -theme "$ROFI_CONFIG")" || return
+    choice="${choice#??}"
+  else
+    list_themes; return
+  fi
+  [[ -n "$choice" ]] && apply_theme "$choice"
+}
+
+cycle_theme() {
+  local direction="$1" current names count index
+  current="$(current_theme)"; mapfile -t names < <(list_themes); count=${#names[@]}; ((count)) || die "No themes found"
+  index=0; for i in "${!names[@]}"; do [[ "${names[$i]}" == "$current" ]] && index=$i; done
+  if [[ "$direction" == next ]]; then index=$(((index+1)%count)); else index=$(((index-1+count)%count)); fi
+  apply_theme "${names[$index]}"
+}
+
+theme_install() {
+  local url="${1:-}" tmp repo name target
+  [[ -n "$url" ]] || die "Usage: kali-omarchy theme install <git-url>"
+  command -v git >/dev/null 2>&1 || die "git is required"
+  tmp="$(mktemp -d)"; repo="$tmp/repo"
+  git clone --depth 1 -- "$url" "$repo"
+  name="$(basename "${url%.git}" | sed -E 's/^omarchy-//;s/-theme$//' | tr '[:upper:]' '[:lower:]')"
+  [[ "$name" =~ ^[a-z0-9][a-z0-9._+-]*$ ]] || die "The repository produces an unsafe theme name: $name"
+  [[ -r "$repo/colors.toml" ]] || die "The repository has no colors.toml at its root"
+  target="$CUSTOM_THEMES/$name"; mkdir -p "$target"
+  install -m644 "$repo/colors.toml" "$target/colors.toml"
+  if [[ -d "$repo/backgrounds" ]]; then
+    mkdir -p "$target/backgrounds"
+    find "$repo/backgrounds" -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -exec cp -- {} "$target/backgrounds/" \;
+  fi
+  python3 "$ENGINE" --themes-dir "$CUSTOM_THEMES" generate --theme "$name" --output "$tmp/check" >/dev/null
+  rm -rf -- "$tmp"; ok "Installed color-only theme '$name'. No executable files were imported."
+}
+
+theme_remove() {
+  local name="${1:-}" target
+  [[ -n "$name" ]] || die "Usage: kali-omarchy theme remove <name>"
+  valid_theme_name "$name" || die "Unsafe theme name: $name"
+  target="$CUSTOM_THEMES/$name"; [[ -d "$target" ]] || die "Only custom themes can be removed: $name"
+  guard_user_path "$target"; [[ "$(current_theme)" != "$name" ]] || die "Switch to another theme before removing $name"
+  printf "Remove custom theme '%s'? [y/N] " "$name"; read -r answer
+  [[ "$answer" =~ ^[Yy]$ ]] || return 0; rm -rf -- "$target"; ok "Removed $name"
+}
+
+background_list() { find "$(wallpaper_dir_for "$(current_theme)")" -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -print | sort; }
+
+background_set() {
+  local file="${1:-}" backup property style
+  [[ -f "$file" ]] || die "Background file not found: $file"
+  printf '%s\n' "$(readlink -f "$file")" >"$CURRENT_BACKGROUND_FILE"
+  backup="$(ensure_backup)"
+  if xfconf_ready; then
+    while IFS= read -r property; do
+      record_xfconf_once "$backup" xfce4-desktop "$property" string; set_xfconf xfce4-desktop "$property" string "$(readlink -f "$file")" || true
+      style="${property%/*}/image-style"; record_xfconf_once "$backup" xfce4-desktop "$style" int; set_xfconf xfce4-desktop "$style" int 5 || true
+    done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/(last-image|image-path)$' || true)
+    xfdesktop --reload >/dev/null 2>&1 || true
+  fi
+  notify "Background changed"; ok "Background: $(basename "$file")"
+}
+
+background_menu() {
+  local choice
+  if command -v rofi >/dev/null 2>&1 && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+    choice="$(background_list | rofi -dmenu -i -p 'Background' -theme "$ROFI_CONFIG")" || return
+    [[ -n "$choice" ]] && background_set "$choice"
+  else background_list; fi
+}
+
+cycle_background() {
+  local direction="$1" current index count
+  mapfile -t files < <(background_list); count=${#files[@]}; ((count)) || die "No backgrounds found"
+  current="$(resolve_wallpaper "$(current_theme)" 2>/dev/null || true)"; index=0
+  for i in "${!files[@]}"; do [[ "${files[$i]}" == "$current" ]] && index=$i; done
+  [[ "$direction" == next ]] && index=$(((index+1)%count)) || index=$(((index-1+count)%count))
+  background_set "${files[$index]}"
+}
+
+background_add() {
+  local file="${1:-}" dir
+  [[ -f "$file" ]] || die "Background file not found: $file"
+  dir="$CUSTOM_THEMES/$(current_theme)/backgrounds"; mkdir -p "$dir"
+  cp -- "$file" "$dir/"; ok "Added $(basename "$file") to $(current_theme)"
+}
+
+font_command() {
+  case "${1:-list}" in
+    list) fc-list :spacing=mono family 2>/dev/null | cut -d, -f1 | sort -u ;;
+    set) shift; local family="$*"; [[ -n "$family" ]] || die "Usage: kali-omarchy font set <family>"; mkdir -p "$CONFIG_DIR"; printf '%s\n' "$family" >"$CONFIG_DIR/font"; apply_theme "$(current_theme)" ;;
+    *) die "Usage: kali-omarchy font [list|set <family>]" ;;
+  esac
+}
+
+preferred_terminal() { for cmd in qterminal xfce4-terminal kitty alacritty foot x-terminal-emulator; do command -v "$cmd" >/dev/null 2>&1 && { printf '%s\n' "$cmd"; return; }; done; return 1; }
+terminal_run() { local term; term="$(preferred_terminal)" || die "No terminal emulator was found"; "$term" -e bash -lc "$*; exec bash" >/dev/null 2>&1 & }
+
+launch_command() {
+  case "${1:-}" in
+    terminal) "$(preferred_terminal)" >/dev/null 2>&1 & ;;
+    tmux) terminal_run 'tmux new-session -A -s main' ;;
+    browser) xdg-open about:blank >/dev/null 2>&1 & ;;
+    files) (command -v thunar >/dev/null && thunar || xdg-open "$HOME") >/dev/null 2>&1 & ;;
+    editor) terminal_run 'nvim .' ;;
+    activity) if command -v btop >/dev/null; then terminal_run btop; elif command -v htop >/dev/null; then terminal_run htop; else terminal_run top; fi ;;
+    settings) xfce4-settings-manager >/dev/null 2>&1 & ;;
+    *) die "Unknown app. Use terminal, tmux, browser, files, editor, activity, or settings." ;;
+  esac
+}
+
+window_command() {
+  command -v wmctrl >/dev/null 2>&1 || die "wmctrl is required: sudo apt install wmctrl"
+  case "${1:-}" in close) wmctrl -c :ACTIVE: ;; fullscreen) wmctrl -r :ACTIVE: -b toggle,fullscreen ;; *) die "Use window close or window fullscreen" ;; esac
+}
+
+workspace_command() {
+  command -v wmctrl >/dev/null 2>&1 || die "wmctrl is required: sudo apt install wmctrl"
+  local action="${1:-}" value="${2:-}" index current count
+  case "$action" in
+    switch) [[ "$value" =~ ^[1-9][0-9]*$ ]] || die "Workspace number required"; wmctrl -s "$((value-1))" ;;
+    move) [[ "$value" =~ ^[1-9][0-9]*$ ]] || die "Workspace number required"; wmctrl -r :ACTIVE: -t "$((value-1))" ;;
+    next|previous) current="$(wmctrl -d | awk '$2=="*"{print $1}')"; count="$(wmctrl -d | wc -l)"; [[ "$action" == next ]] && index=$(((current+1)%count)) || index=$(((current-1+count)%count)); wmctrl -s "$index" ;;
+    *) die "Usage: kali-omarchy workspace <switch|move> <number> | <next|previous>" ;;
+  esac
+}
+
+toggle_bool_xfconf() {
+  local channel="$1" property="$2" type="$3" on_message="$4" off_message="$5" current next
+  xfconf_ready || die "Run this from an active Xfce desktop session"
+  current="$(xfconf-query -c "$channel" -p "$property" 2>/dev/null || echo false)"
+  [[ "$current" == true ]] && next=false || next=true
+  set_xfconf "$channel" "$property" "$type" "$next"
+  [[ "$next" == true ]] && { notify "$on_message"; echo "$on_message"; } || { notify "$off_message"; echo "$off_message"; }
+}
+
+toggle_command() {
+  local name="${1:-}" action="${2:-toggle}" flag="$STATE_DIR/toggles/$name"
+  mkdir -p "$STATE_DIR/toggles"
+  if [[ "$action" == status ]]; then [[ -e "$flag" ]] && echo on || echo off; return; fi
+  case "$name" in
+    dnd) toggle_bool_xfconf xfce4-notifyd /do-not-disturb bool 'Do not disturb on' 'Do not disturb off' ;;
+    idle) toggle_bool_xfconf xfce4-power-manager /xfce4-power-manager/presentation-mode bool 'Stay awake on' 'Stay awake off' ;;
+    compositor) toggle_bool_xfconf xfwm4 /general/use_compositing bool 'Compositor on' 'Compositor off' ;;
+    nightlight)
+      if [[ -e "$flag" ]]; then command -v redshift >/dev/null && redshift -x >/dev/null 2>&1 || true; rm -f -- "$flag"; notify 'Night light off'; echo off
+      else command -v redshift >/dev/null || die "redshift is required: sudo apt install redshift"; redshift -O 4000 >/dev/null 2>&1; touch "$flag"; notify 'Night light on (4000K)'; echo on; fi ;;
+    panel)
+      if pgrep -x xfce4-panel >/dev/null 2>&1; then xfce4-panel --quit; touch "$flag"; notify 'Panel hidden'
+      else xfce4-panel >/dev/null 2>&1 & rm -f -- "$flag"; notify 'Panel shown'; fi ;;
+    *) die "Unknown toggle. Use dnd, nightlight, idle, panel, or compositor." ;;
+  esac
+}
+
+capture_command() {
+  local action="${1:-screenshot}" mode="${2:-region}" tmp text
+  case "$action" in
+    screenshot)
+      command -v xfce4-screenshooter >/dev/null 2>&1 || die "Install xfce4-screenshooter"
+      case "$mode" in full|fullscreen) xfce4-screenshooter -f ;; window) xfce4-screenshooter -w ;; *) xfce4-screenshooter -r ;; esac ;;
+    ocr|qr)
+      command -v flameshot >/dev/null 2>&1 || die "Install flameshot"
+      command -v xclip >/dev/null 2>&1 || die "Install xclip"
+      tmp="$(mktemp --suffix=.png)"; flameshot gui --raw >"$tmp" || { rm -f -- "$tmp"; return; }
+      if [[ "$action" == ocr ]]; then command -v tesseract >/dev/null 2>&1 || die "Install tesseract-ocr"; text="$(tesseract "$tmp" stdout 2>/dev/null)"
+      else command -v zbarimg >/dev/null 2>&1 || die "Install zbar-tools"; text="$(zbarimg --quiet --raw "$tmp")"; fi
+      rm -f -- "$tmp"; printf '%s' "$text" | xclip -selection clipboard; notify "${action^^} result copied" ;;
+    record) if command -v obs >/dev/null; then obs >/dev/null 2>&1 & elif command -v simplescreenrecorder >/dev/null; then simplescreenrecorder >/dev/null 2>&1 & else die "Install obs-studio or simplescreenrecorder"; fi ;;
+    *) die "Use capture screenshot, ocr, qr, or record" ;;
+  esac
+}
+
+duration_seconds() {
+  local value="$1"
+  case "$value" in *s) echo "${value%s}" ;; *m) echo "$(( ${value%m} * 60 ))" ;; *h) echo "$(( ${value%h} * 3600 ))" ;; *d) echo "$(( ${value%d} * 86400 ))" ;; [0-9]*) echo "$((value*60))" ;; *) return 1 ;; esac
+}
+
+reminder_add() {
+  local duration="${1:-}"; shift || true; local message="$*" seconds id file due
+  [[ -n "$duration" && -n "$message" ]] || die "Usage: kali-omarchy reminder add 10m <message>"
+  seconds="$(duration_seconds "$duration")" || die "Duration must look like 30s, 10m, 2h, or 1d"
+  [[ "$seconds" =~ ^[0-9]+$ && "$seconds" -gt 0 ]] || die "Duration must be greater than zero"
+  command -v systemd-run >/dev/null 2>&1 || die "systemd-run is required for reliable reminders"
+  mkdir -p "$STATE_DIR/reminders"; id="$(date +%s)-$RANDOM"; file="$STATE_DIR/reminders/$id.txt"; due=$(( $(date +%s) + seconds ))
+  printf '%s\n%s\n' "$due" "$message" >"$file"
+  systemd-run --user --quiet --unit="kali-omarchy-reminder-$id" --on-active="${seconds}s" "$APP_DIR/bin/kali-omarchy-reminder-fire" "$file"
+  ok "Reminder set for $duration: $message"
+}
+
+reminder_list() { local file due message; shopt -s nullglob; for file in "$STATE_DIR/reminders"/*.txt; do due="$(sed -n '1p' "$file")"; message="$(sed -n '2,$p' "$file" | tr '\n' ' ')"; printf '%s  %s\n' "$(date -d "@$due" '+%Y-%m-%d %H:%M')" "$message"; done; }
+reminder_clear() { systemctl --user list-units --all 'kali-omarchy-reminder-*' --no-legend 2>/dev/null | awk '{print $1}' | xargs -r systemctl --user stop; find "$STATE_DIR/reminders" -maxdepth 1 -type f -name '*.txt' -delete 2>/dev/null || true; ok 'Reminders cleared'; }
+reminder_prompt() { "$APP_DIR/bin/kali-omarchy-menu" reminder; }
+
+notice_command() {
+  local action="${1:-about}" message battery status location="${2:-}"
+  case "$action" in
+    datetime) message="$(date '+%A, %d %B %Y — %H:%M %Z')" ;;
+    battery) battery="$(find /sys/class/power_supply -maxdepth 2 -name capacity -path '*BAT*' -print -quit 2>/dev/null)"; [[ -n "$battery" ]] || die "No battery detected"; status="$(cat "$(dirname "$battery")/status" 2>/dev/null || true)"; message="Battery $(cat "$battery")% — $status" ;;
+    weather) command -v curl >/dev/null 2>&1 || die "curl is required"; message="$(curl -fsS --max-time 8 "https://wttr.in/${location// /+}?format=%l:+%c+%t,+%w" || echo 'Weather unavailable')" ;;
+    about) if command -v fastfetch >/dev/null 2>&1; then terminal_run fastfetch; return; else message="Kali Omarchy $VERSION — $(current_theme) — $(uname -sr)"; fi ;;
+    *) die "Use notice datetime, battery, weather, or about" ;;
+  esac
+  notify "$message"; printf '%s\n' "$message"
+}
+
+hotkeys_text() {
+  cat <<'EOF'
+KALI OMARCHY HOTKEYS (Xfce mapping)
+
+Super+Space             Unified menu
+Super+Alt+Space         Applications
+Super+Ctrl+Shift+Space  Theme picker
+Super+Ctrl+Space        Background picker
+Super+K                 This cheatsheet
+Super+Return            Terminal
+Super+Alt+Return        Tmux session
+Super+Shift+Return      Browser
+Super+Shift+F           Files
+Super+Ctrl+T            Activity monitor
+Super+Escape            System menu
+Super+Ctrl+L            Lock
+Super+Ctrl+N            Night light
+Super+Ctrl+,            Do not disturb
+Super+Ctrl+I            Stay awake
+Super+Ctrl+R            Reminder
+Super+Ctrl+V            Clipboard history
+Print                   Region screenshot
+Super+Ctrl+Print        OCR to clipboard
+Super+F                 Fullscreen
+Super+W / Super+Q       Close window
+Super+1..4              Switch workspace
+Super+Shift+1..4        Move window to workspace
+
+Hyprland-only tiling, grouping, scratchpads and directional focus are not
+forced onto Xfce. See docs/OMARCHY-ANALYSIS.md in the downloaded package.
+EOF
+}
+
+hotkeys_command() {
+  if [[ "${1:-}" == --window ]] && command -v yad >/dev/null 2>&1; then hotkeys_text | yad --text-info --title='Kali Omarchy Hotkeys' --width=680 --height=720 --button=Close:0
+  elif [[ "${1:-}" == --window ]]; then terminal_run 'kali-omarchy hotkeys; read -rp "Press Enter to close"'; else hotkeys_text; fi
+}
+
+restore_files() {
+  local backup="$1" state path relative source
+  while IFS=$'\t' read -r state path; do
+    [[ -n "$path" ]] || continue; guard_user_path "$path"
+    if [[ "$state" == present ]]; then relative="${path#/}"; source="$backup/files/$relative"; [[ -e "$source" || -L "$source" ]] || { warn "Missing backup for $path"; continue; }; rm -rf -- "$path"; mkdir -p "$(dirname -- "$path")"; cp -a -- "$source" "$path"
+    elif [[ "$state" == absent ]]; then rm -rf -- "$path"; fi
+  done <"$backup/files.tsv"
+}
+
+restore_xfconf() {
+  local backup="$1" state channel property type encoded value
+  [[ -s "$backup/xfconf.tsv" ]] || return 0
+  xfconf_ready || { warn "Xfce is unavailable; desktop restore is pending."; return 1; }
+  while IFS=$'\t' read -r state channel property type encoded; do
+    [[ -n "$property" ]] || continue
+    if [[ "$state" == present ]]; then value="$(b64_decode "$encoded")"; set_xfconf "$channel" "$property" "$type" "$value" || warn "Could not restore $property"
+    else xfconf-query -c "$channel" -p "$property" -r >/dev/null 2>&1 || true; fi
+  done < <(tac "$backup/xfconf.tsv")
+  xfdesktop --reload >/dev/null 2>&1 || true; xfce4-panel -r >/dev/null 2>&1 || true
+}
+
+restore_theme() {
+  local backup desktop_ok=1; backup="$(active_backup 2>/dev/null)" || die "No active restore point was found"
+  info "Restoring $backup"; restore_xfconf "$backup" || desktop_ok=0; restore_files "$backup"
+  if ((desktop_ok)); then rm -f -- "$ACTIVE_BACKUP_FILE"; ok "Pre-theme settings restored"
+  else warn "Files are restored. Run restore again from an Xfce terminal to finish desktop settings."; fi
+}
+
+status_command() {
+  printf '%b\n' "${bold}Kali Omarchy $VERSION${reset}"
+  printf '  Theme:          %s\n' "$(current_theme)"
+  printf '  Background:     %s\n' "$([[ -r "$CURRENT_BACKGROUND_FILE" ]] && basename "$(<"$CURRENT_BACKGROUND_FILE")" || echo default)"
+  printf '  Font:           %s\n' "$(current_font)"
+  printf '  Desktop:        %s\n' "${XDG_CURRENT_DESKTOP:-not detected}"
+  printf '  Xfce session:   %s\n' "$(xfconf_ready && echo connected || echo unavailable)"
+  printf '  Restore point:  %s\n' "$([[ -r "$ACTIVE_BACKUP_FILE" ]] && echo available || echo none)"
+  printf '  Themes:         %s bundled\n' "$(find "$BUNDLED_THEMES" -mindepth 2 -maxdepth 2 -name colors.toml | wc -l)"
+  printf '  Launcher:       %s\n' "$(command -v rofi >/dev/null && echo ready || echo missing)"
+  printf '  Terminal:       %s\n' "$(preferred_terminal 2>/dev/null || echo missing)"
+}
+
+doctor_command() {
+  local failures=0 cmd
+  printf '%b\n' "${bold}Kali Omarchy doctor${reset}"
+  for cmd in python3 xfconf-query rofi qterminal zsh tmux btop fastfetch wmctrl xclip xfce4-screenshooter; do
+    if command -v "$cmd" >/dev/null 2>&1; then printf '  %-22s %bOK%b\n' "$cmd" "$green" "$reset"
+    else printf '  %-22s %bmissing%b\n' "$cmd" "$yellow" "$reset"; ((failures+=1)); fi
+  done
+  [[ "${XDG_CURRENT_DESKTOP:-}" == *XFCE* || "${XDG_CURRENT_DESKTOP:-}" == *Xfce* ]] && printf '  %-22s %bOK%b\n' 'Xfce desktop' "$green" "$reset" || { printf '  %-22s %bnot active%b\n' 'Xfce desktop' "$yellow" "$reset"; ((failures+=1)); }
+  printf '\nMissing optional components: %d\n' "$failures"
+}
+
+uninstall_theme() {
+  [[ -r "$ACTIVE_BACKUP_FILE" ]] && restore_theme
+  [[ -r "$ACTIVE_BACKUP_FILE" ]] && die "Finish the Xfce restore before uninstalling"
+  printf 'Remove Kali Omarchy program files? [y/N] '; read -r answer; [[ "$answer" =~ ^[Yy]$ ]] || return
+  guard_user_path "$APP_DIR"; rm -f -- "$HOME/.local/bin/kali-omarchy" "$HOME/.local/bin/kali-omarchy-launcher" "$HOME/.local/bin/kali-omarchy-menu"; rm -rf -- "$APP_DIR"
+  ok "Kali Omarchy removed. APT packages were kept because other apps may use them."
+}
+
+cmd="${1:-menu}"; shift || true
+case "$cmd" in
+  menu) exec "$APP_DIR/bin/kali-omarchy-menu" "${1:-root}" ;;
+  launcher) exec "$APP_DIR/bin/kali-omarchy-launcher" ;;
+  theme)
+    sub="${1:-menu}"; shift || true
+    case "$sub" in menu) theme_menu ;; list) list_themes ;; set) apply_theme "${1:-}" ;; next|previous) cycle_theme "$sub" ;; install) theme_install "$@" ;; remove) theme_remove "$@" ;; *) apply_theme "$sub" ;; esac ;;
+  background)
+    sub="${1:-menu}"; shift || true
+    case "$sub" in menu) background_menu ;; list) background_list ;; set) background_set "${1:-}" ;; next|previous) cycle_background "$sub" ;; add) background_add "${1:-}" ;; *) background_set "$sub" ;; esac ;;
+  font) font_command "$@" ;;
+  launch) launch_command "$@" ;;
+  window) window_command "$@" ;;
+  workspace) workspace_command "$@" ;;
+  toggle) toggle_command "$@" ;;
+  capture) capture_command "$@" ;;
+  reminder)
+    sub="${1:-list}"; shift || true
+    case "$sub" in add) reminder_add "$@" ;; list) reminder_list ;; clear) reminder_clear ;; prompt) reminder_prompt ;; *) die "Use reminder add, list, clear, or prompt" ;; esac ;;
+  notice) notice_command "$@" ;;
+  hotkeys) hotkeys_command "$@" ;;
+  apply) apply_theme "${1:-$(current_theme)}" ;;
+  restore) restore_theme ;;
+  status) status_command ;;
+  doctor|debug) doctor_command ;;
+  uninstall) uninstall_theme ;;
+  version) echo "Kali Omarchy $VERSION" ;;
+  help|-h|--help) usage ;;
+  *) usage; die "Unknown command: $cmd" ;;
+esac

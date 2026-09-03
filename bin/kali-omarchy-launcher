@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+APP_DIR="${KALI_OMARCHY_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/kali-omarchy}"
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/kali-omarchy.rasi"
+
+if ! command -v rofi >/dev/null 2>&1; then
+  notify-send "Kali Omarchy" "Rofi is not installed. Run: sudo apt install rofi" 2>/dev/null || true
+  exit 1
+fi
+
+[[ -r "$CONFIG" ]] || CONFIG="$APP_DIR/rofi/kali-omarchy.rasi"
+exec rofi -show drun -show-icons -theme "$CONFIG"

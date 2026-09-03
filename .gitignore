@@ -1,0 +1,19 @@
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Local archives and generated release files
+*.zip
+*.tar.gz
+SHA256SUMS
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test and coverage output
+.coverage
+.pytest_cache/
+coverage.xml

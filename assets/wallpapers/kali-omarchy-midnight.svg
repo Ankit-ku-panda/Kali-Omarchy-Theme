@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070911"/>
+      <stop offset="0.48" stop-color="#0b0d18"/>
+      <stop offset="1" stop-color="#101529"/>
+    </linearGradient>
+    <radialGradient id="blue" cx="0.74" cy="0.2" r="0.68">
+      <stop offset="0" stop-color="#7aa2f7" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#283457" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#0b0d14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="violet" cx="0.28" cy="0.78" r="0.72">
+      <stop offset="0" stop-color="#bb9af7" stop-opacity="0.22"/>
+      <stop offset="0.62" stop-color="#1a1b26" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#0b0d14" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7dcfff" stop-opacity="0"/>
+      <stop offset="0.52" stop-color="#7aa2f7" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#bb9af7" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="45"/>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#7aa2f7" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#blue)"/>
+  <rect width="1920" height="1080" fill="url(#violet)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <path d="M-80 842 C300 670 480 1020 830 760 S1420 520 2000 700" fill="none" stroke="#7aa2f7" stroke-opacity="0.13" stroke-width="92" filter="url(#blur)"/>
+  <path d="M-120 840 C300 650 480 1000 830 750 S1420 500 2040 690" fill="none" stroke="url(#line)" stroke-width="2"/>
+  <path d="M-80 876 C330 700 510 1030 850 790 S1450 560 2000 730" fill="none" stroke="#bb9af7" stroke-opacity="0.18" stroke-width="1"/>
+  <g transform="translate(120 900)">
+    <rect x="0" y="0" width="42" height="2" rx="1" fill="#7aa2f7"/>
+    <text x="0" y="34" fill="#c0caf5" fill-opacity="0.72" font-family="JetBrains Mono, monospace" font-size="18" letter-spacing="5">KALI // OMARCHY</text>
+    <text x="0" y="62" fill="#737aa2" fill-opacity="0.62" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="3">MIDNIGHT DESKTOP LAYER</text>
+  </g>
+</svg>
+
