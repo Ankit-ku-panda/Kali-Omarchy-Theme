@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-
+        
+      - name: Make script executable
+        run: chmod +x ./tests/smoke-test.sh
+        
       - name: Run isolated smoke tests
         run: ./tests/smoke-test.sh
